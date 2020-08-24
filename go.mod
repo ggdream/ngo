@@ -1,4 +1,4 @@
-module ngo
+module github.com/ggdream/ngo
 
 go 1.14
 
