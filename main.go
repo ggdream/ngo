@@ -59,5 +59,7 @@ func service(serve Serve){
 
 	r.Static("/", serve.Entry)
 
-	r.Run(serve.Addr)
+	if err := r.Run(serve.Addr); err != nil {
+		panic(err.Error())
+	}
 }
