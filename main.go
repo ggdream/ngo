@@ -1,10 +1,10 @@
 package main
 
-
 import (
 	"fmt"
-	"os"
+	"github.com/ggdream/ngo/middle"
 	"github.com/gin-gonic/gin"
+	"os"
 )
 
 const (
@@ -13,8 +13,8 @@ const (
 )
 
 type Serve struct {
-	Addr	string
-	Entry	string
+	Addr  string
+	Entry string
 }
 
 func main() {
@@ -38,27 +38,35 @@ func parse() Serve {
 	return Serve{}
 }
 
-func service(serve Serve){
+func service(serve Serve) {
 	gin.SetMode(gin.ReleaseMode)
-	
-	r := gin.New()
-	r.Use(gin.Recovery())
-	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Header("Access-Control-Allow-Methods", "GET,POST,POTIONS")
-		c.Header("Access-Control-Allow-Headers", "Content-Length,Range")
-		c.Header("Access-Control-Expose-Headers", "Content-Length,Content-Range")
-		c.Header("Access-Control-Max-Age", "172800")
-		c.Header("Access-Control-Allow-Credentials", "true")
 
-		if c.Request.Method == "OPTIONS"{
-			c.AbortWithStatus(204)
+	r := gin.New()
+	l := gin.New()
+
+	go func() {
+		for {
+			if len(middle.Id) == 0 && len(middle.Ch) != 0 {
+				<-middle.Ch
+			}
 		}
-		c.Next()
-	})
+	}()
+
+	r.Use(gin.Recovery())
+	r.Use(middle.Cors)
+	r.Use(middle.Record())
+
+	l.Use(gin.Recovery())
+	l.Use(middle.Cors)
 
 	r.Static("/", serve.Entry)
+	l.GET("/log", middle.Logger(middle.Ch, middle.Id))
 
+	go func() {
+		if err := l.Run(":8888"); err != nil {
+			panic(err.Error())
+		}
+	}()
 	if err := r.Run(serve.Addr); err != nil {
 		panic(err.Error())
 	}

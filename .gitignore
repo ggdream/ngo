@@ -2,3 +2,6 @@
 .idea/
 
 *_test.go
+
+main.exe
+ngo.exe
