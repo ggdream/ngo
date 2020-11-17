@@ -1,4 +1,4 @@
-FROM golang:1.14.6
+FROM golang:1.15.5
 
 
 WORKDIR /app
@@ -7,7 +7,7 @@ COPY . .
 ENV GO111MODULE on
 ENV GOPROXY https://goproxy.cn,direct
 
-RUN go build github.com/ggdream/ngo
+RUN go install
 
-EXPOSE 80 8888
-CMD ["./ngo", ":80", "./static"]
+EXPOSE 54639
+CMD ["ngo"]
